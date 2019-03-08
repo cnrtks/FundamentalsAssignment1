@@ -29,12 +29,8 @@ public class Tester {
             playerArr.add(new TexasPlayer(name, id, wallet));
         }
         th1.setPlayers(playerArr);
-
-        Deck d1 = new Deck(52);
-        System.out.println(d1.toString());
-        d1.shuffle();
-        System.out.println(d1.toString());
         
+        TexasRound round1 = new TexasRound(playerArr, th1.getFirstPlayer());
         
         
     }

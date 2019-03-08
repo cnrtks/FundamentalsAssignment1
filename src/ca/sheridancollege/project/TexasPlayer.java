@@ -3,6 +3,8 @@ package ca.sheridancollege.project;
 public class TexasPlayer extends Player{
     
     private double wallet;
+    private Card card1;
+    private Card card2;
     
     TexasPlayer(String name, String id, double wallet){
         super(name);
@@ -10,9 +12,17 @@ public class TexasPlayer extends Player{
         setWallet(wallet);
     }
     
+    //getters and setters
     public void setWallet(double wallet){
         this.wallet = wallet;
     }
+    public void setCard1(Card card){
+        card1 = card;
+    }
+    public void setCard2(Card card){
+        card2 = card;
+    }
+    //end of getters and setters
     
     public void walletUpdate (double amount){
         wallet += amount;

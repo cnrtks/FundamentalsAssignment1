@@ -1,10 +1,10 @@
 package ca.sheridancollege.project;
 
+
 public class TexasHoldem extends Game{
     
     int firstPlayer = 0;
     int rounds = 0;
-    //go to round
     
     TexasHoldem(String givenName){
         super(givenName);
@@ -14,7 +14,7 @@ public class TexasHoldem extends Game{
         return firstPlayer;
     }
     
-    public void whoFirst(){
+    public void setFirstPlayer(){
         firstPlayer = rounds % getPlayers().size();
     }
     

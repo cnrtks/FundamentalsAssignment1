@@ -35,6 +35,23 @@ public class GroupOfCards
         cards.add(c);
     }
     
+    //returns last card by default
+    public Card getCard(){
+        return cards.get(getSize() - 1);
+    }
+    //returns card at index number
+    public Card getCard(int index){
+        return cards.get(index);
+    }
+    //removes last card from arraylist
+    public void removeCard(){
+        cards.remove(getSize() - 1);
+    }
+    //removes card at index
+    public void removeCard(int index){
+        cards.remove(index);
+    }
+    
     public void clearGroupOfCards(){
         cards.clear();
     }
@@ -67,6 +84,7 @@ public class GroupOfCards
         size = givenSize;
     }
     
+    //returns a random card
     public Card pickCard(){
         int randC = (int)(Math.floor(Math.random()* getSize() + 1));
         return cards.get(randC);
