@@ -11,7 +11,7 @@ public class TexasOutput {
     }
     
     public static String betMenuString(boolean see){
-        String item1 = see ? "See" : "Stay";
+        String item1 = see ? "Stay" : "See";
         String menu = String.format("\n1.%s\n2.Raise\n3.Fold\n", item1);
         return menu;
     }

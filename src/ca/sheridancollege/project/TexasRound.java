@@ -105,6 +105,7 @@ public class TexasRound {
 
     public void playerPrompt(TexasPlayer player) {
         System.out.println(table.toString());
+        System.out.printf("\n%s %s",player.getCard1(), player.getCard2());
         System.out.println(TexasOutput.walletString(player.getWallet()));
         System.out.println(TexasOutput.toCallString(toCall(player)));
 
