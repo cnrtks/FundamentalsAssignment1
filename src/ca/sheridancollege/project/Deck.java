@@ -1,12 +1,9 @@
 
 package ca.sheridancollege.project;
 
-import java.util.ArrayList;
-
 public class Deck extends GroupOfCards{
     
-    public Deck(int size){
-        super(size);
+    public Deck(){
         init();
     }
     
@@ -18,9 +15,10 @@ public class Deck extends GroupOfCards{
         }     
     }
     
+    @Override
     public String toString(){
         String ret = "";
-        for (int i = 0; i < getSize(); i ++){
+        for (int i = 0; i < super.getSize(); i ++){
             ret += showCards().get(i).toString();
             ret += "\n";
         }

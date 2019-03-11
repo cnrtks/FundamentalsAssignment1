@@ -1,7 +1,6 @@
 
 package ca.sheridancollege.project;
 
-import java.util.Scanner;
 import java.util.ArrayList;
 
 public class Tester {
@@ -11,21 +10,19 @@ public class Tester {
      */
     public static void main(String[] args) {
         
-        Scanner kb = new Scanner(System.in);
-        
         TexasHoldem th1 = new TexasHoldem("game1");
                 
         System.out.println("Enter Number of players: ");
-        int numOfPlayers = kb.nextInt();
+        int numOfPlayers = TexasUserInput.getNumPlayers();
         ArrayList<Player> playerArr = new ArrayList<Player>();
         
         for (int i = 0; i < numOfPlayers; i++){
             System.out.println("Enter Player name: ");
-            String name = kb.nextLine();
+            String name = UserInput.getString();
             System.out.println("Enter Player ID: ");
-            String id = kb.nextLine();
+            String id = UserInput.getString();
             System.out.println("How much money they got?");
-            double wallet = kb.nextDouble();
+            double wallet = UserInput.getDouble();
             playerArr.add(new TexasPlayer(name, id, wallet));
         }
         th1.setPlayers(playerArr);

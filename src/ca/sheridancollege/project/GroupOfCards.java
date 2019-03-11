@@ -19,12 +19,9 @@ public class GroupOfCards
    
     //The group of cards, stored in an ArrayList
     private ArrayList <Card> cards;
-    private int size;//the size of the grouping
     
-    public GroupOfCards(int givenSize)
-    {
-        size = givenSize;
-        cards = new ArrayList<Card>();
+    public GroupOfCards(){
+        cards = new ArrayList();
     }
     
     public void setCards(ArrayList<Card> cards){
@@ -35,9 +32,12 @@ public class GroupOfCards
         cards.add(c);
     }
     
+    public int getSize(){
+        return cards.size();
+    }
     //returns last card by default
     public Card getCard(){
-        return cards.get(getSize() - 1);
+        return cards.get(cards.size()-1);
     }
     //returns card at index number
     public Card getCard(int index){
@@ -45,7 +45,7 @@ public class GroupOfCards
     }
     //removes last card from arraylist
     public void removeCard(){
-        cards.remove(getSize() - 1);
+        cards.remove(cards.size() - 1);
     }
     //removes card at index
     public void removeCard(int index){
@@ -69,24 +69,10 @@ public class GroupOfCards
     {
         Collections.shuffle(cards);
     }
-
-    /**
-     * @return the size of the group of cards
-     */
-    public int getSize() {
-        return size;
-    }
-
-    /**
-     * @param givenSize the max size for the group of cards
-     */
-    public void setSize(int givenSize) {
-        size = givenSize;
-    }
     
     //returns a random card
     public Card pickCard(){
-        int randC = (int)(Math.floor(Math.random()* getSize() + 1));
+        int randC = (int)(Math.floor(Math.random()* cards.size()));
         return cards.get(randC);
     }
     

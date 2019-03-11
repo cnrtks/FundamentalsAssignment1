@@ -7,70 +7,66 @@ public class TexasRound {
     public static final double MINIMUM_BET = 0.25;
     public static final double SMALL_BLIND = 1;
     public static final double BIG_BLIND = 2;
-    //number of items in playerPrompt
-    public static final int MENU_ITEMS = 3;
 
     //private String roundName;
     //the total money on the table
     private double pot = 0;
     //the total a player must have bet during the round to stay in
     private double highestBet = 0;
+    //the smallest wallet entering the game ensures everyone can play (split pot not implemented)
+    private double totalBetCap = 0;
     //keeps track of whos turn it is
     private int currentPlayer;
     //borrows players from games arraylist
-    private ArrayList<TexasPlayer> texasPlayers;
-    //false when the player can stay, true when they must see a raise
-    public boolean mustSee = true;
+    private ArrayList<TexasPlayer> roundPlayers;
     //true when no players must see to meet a raise, everyone has stayed
     public boolean allCall = false;
 
     public Deck deck;
     public Table table;
 
-    public TexasRound(ArrayList<Player> players, int firstPlayer) {
+    public TexasRound(ArrayList<Player> perpetualPlayers, int firstPlayer) {
         //setRoundName(name);
-        for (int i = 0; i < players.size(); i++) {
-            texasPlayers.add((TexasPlayer) players.get(i));
+        roundPlayers = new ArrayList<TexasPlayer>();
+        for (int i = 0; i < (perpetualPlayers.size()); i++) {
+            roundPlayers.add((TexasPlayer) perpetualPlayers.get(i));
+            totalBetCap = totalBetCap > roundPlayers.get(i).getWallet() ? totalBetCap : roundPlayers.get(i).getWallet();
         }
         currentPlayer = firstPlayer;
 
-        deck = new Deck(52);
+        deck = new Deck();
         deck.shuffle();
+        table = new Table();
 
-        smallBlind(texasPlayers.get(currentPlayer));
+        smallBlind(roundPlayers.get(currentPlayer));
         nextPlayer();
-        bigBlind(texasPlayers.get(currentPlayer));
+        bigBlind(roundPlayers.get(currentPlayer));
         nextPlayer();
-        dealTable();
-        dealTable();
-        dealTable();
-
-        while (allCall != true) {
-            playerPrompt(mustSee, texasPlayers.get(currentPlayer));
-            nextPlayer();
-        }
 
         dealTable();
+        dealTable();
+        dealTable();
+        betRound();
+
+        dealTable();
+        betRound();
+
+        dealTable();
+        betRound();
+        System.out.println(table.toString());
+        //showdown();
     }
 
-    // getters and setters
-//    public void setRoundName(String name) {
-//        roundName = name;
-//    }
     public void setCurrentPlayer(int currentPlayer) {
         this.currentPlayer = currentPlayer;
     }
     //end of getters and setters
 
-    public boolean bet(TexasPlayer player, double amount) {
-        if (player.getWallet() >= amount) {
-            player.walletUpdate(-1 * amount);
-            player.roundBetUpdate(amount);
-            pot += amount;
-            return true;
-        } else {
-            return false;
-        }
+    public void bet(TexasPlayer player, double amount) {
+        player.walletUpdate(-1 * amount);
+        player.roundBetUpdate(amount);
+        highestBet = player.getRoundBet() > highestBet ? player.getRoundBet() : highestBet;
+        pot += amount;
     }
 
     public void bigBlind(TexasPlayer player) {
@@ -88,12 +84,12 @@ public class TexasRound {
     }
 
     public void dealFirstHand() {
-        for (int i = 0; i < texasPlayers.size(); i++) {//fix this, it is nearly duplicate
-            (texasPlayers.get(i)).setCard1(deck.getCard());
+        for (int i = 0; i < roundPlayers.size(); i++) {//fix this, it is nearly duplicate
+            (roundPlayers.get(i)).setCard1(deck.getCard());
             deck.removeCard();
         }
-        for (int i = 0; i < texasPlayers.size(); i++) {//duplicate
-            (texasPlayers.get(i)).setCard2(deck.getCard());
+        for (int i = 0; i < roundPlayers.size(); i++) {//duplicate
+            (roundPlayers.get(i)).setCard2(deck.getCard());
             deck.removeCard();
         }
     }
@@ -104,42 +100,78 @@ public class TexasRound {
     }
 
     public void nextPlayer() {
-        currentPlayer = currentPlayer <= texasPlayers.size() ? currentPlayer + 1 : 0;
+        currentPlayer = currentPlayer < roundPlayers.size() - 1 ? currentPlayer + 1 : 0;
     }
 
-    public void playerPrompt(boolean see, TexasPlayer player) {
-        String item1 = see == true ? "See" : "Stay";
-        String menu = String.format("\n1.%s\n2.Raise\n3.Fold", item1);
-        int menuItem = 0;
+    public void playerPrompt(TexasPlayer player) {
+        System.out.println(table.toString());
+        System.out.println(TexasOutput.walletString(player.getWallet()));
+        System.out.println(TexasOutput.toCallString(toCall(player)));
 
-        while (menuItem < 1 || menuItem > MENU_ITEMS) {
-            System.out.println(menu);
-            menuItem = UserInput.getInt();
-        }
-        switch (menuItem) {
-            case 1:
-                see(player);
-                break;
-            case 2:
-                raise(player);
-                break;
-            case 3:
-                texasPlayers.remove(player);
-                setCurrentPlayer(currentPlayer-=1);
-                break;
-            default:
-            //throw()
-        }
+        //boolean param tells menu if call or stay
+        System.out.println(TexasOutput.betMenuString(toCall(player) == 0));
+        betMenu(player, TexasUserInput.getBetMenu());
     }
 
     public void see(TexasPlayer player) {
-        bet(player, (highestBet - player.getRoundBet()));
+        bet(player, toCall(player));
     }
 
     public void raise(TexasPlayer player) {
         see(player);
         System.out.println("\nRaise Amount: ");
-        double amount = UserInput.getDouble();
+        double amount = TexasUserInput.getRaiseAmount(totalBetCap - highestBet);
         bet(player, amount);
+    }
+
+    public boolean checkCall() {
+        for (int i = 0; i < roundPlayers.size(); i++) {
+            if (roundPlayers.get(i).getRoundBet() != highestBet) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //logic relating to gameplay, this occurs three times during the game
+    public void betRound() {
+        for (int i = 0; i < roundPlayers.size(); i++) {
+            playerPrompt(roundPlayers.get(currentPlayer));
+            nextPlayer();
+        }
+        allCall = checkCall();
+        while (allCall != true) {
+            playerPrompt(roundPlayers.get(currentPlayer));
+            nextPlayer();
+            allCall = checkCall();
+        }
+    }
+
+    public void checkLMS() {
+        if (roundPlayers.size() == 1) {
+            //initiate win sequence
+        }
+    }
+
+    public double toCall(TexasPlayer player) {
+        return highestBet - player.getRoundBet();
+    }
+
+    public void betMenu(TexasPlayer player, int menuItem) {
+        switch (menuItem) {
+            case 1: //see or stay
+                see(player);
+                break;
+            case 2: //raise
+                raise(player);
+                break;
+            case 3: //fold
+                roundPlayers.remove(player);
+                setCurrentPlayer(currentPlayer -= 1);
+                checkLMS();
+                break;
+            default:
+                betMenu(player, TexasUserInput.getBetMenu());
+        }
     }
 }

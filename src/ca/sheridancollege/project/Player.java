@@ -22,9 +22,7 @@ public abstract class Player
         playerID= name;
     }
     
-    /**
-     * @return the playerID
-     */
+    //@return the playerID
     public String getPlayerID() 
     {
         return playerID;
