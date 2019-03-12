@@ -2,7 +2,7 @@
 package ca.sheridancollege.project;
 
 
-public class PlayingCard extends Card{
+public class PlayingCard extends Card implements Comparable<PlayingCard>{
     
     private Rank rank;
     private Suit suit;
@@ -40,4 +40,11 @@ public class PlayingCard extends Card{
     public String shortString(){
         return "" + rank.getSymbol() + suit.getSymbol();
     };
+    
+    @Override
+    public int compareTo(PlayingCard comp){
+        int compareRankVal = (comp).getRank().getVal();
+        return (this.getRank().getVal() - compareRankVal);
+        
+    }
 }

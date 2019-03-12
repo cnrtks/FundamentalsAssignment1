@@ -42,15 +42,18 @@ public class TexasRound {
         nextPlayer();
         bigBlind(roundPlayers.get(currentPlayer));
         nextPlayer();
-
+        //hole cards
+        dealFirstHand();
+        betRound();
+        //the flop
         dealTable();
         dealTable();
         dealTable();
         betRound();
-
+        //the turn
         dealTable();
         betRound();
-
+        //the river
         dealTable();
         betRound();
         System.out.println(table.toString());
@@ -105,7 +108,7 @@ public class TexasRound {
 
     public void playerPrompt(TexasPlayer player) {
         System.out.println(table.toString());
-        System.out.printf("\n%s %s",player.getCard1(), player.getCard2());
+        System.out.println(TexasOutput.playerHand(player));
         System.out.println(TexasOutput.walletString(player.getWallet()));
         System.out.println(TexasOutput.toCallString(toCall(player)));
 

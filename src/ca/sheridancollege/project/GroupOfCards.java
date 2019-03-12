@@ -71,7 +71,7 @@ public class GroupOfCards
     }
     
     //returns a random card
-    public Card pickCard(){
+    public Card randCard(){
         int randC = (int)(Math.floor(Math.random()* cards.size()));
         return cards.get(randC);
     }

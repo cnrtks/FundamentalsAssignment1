@@ -23,4 +23,8 @@ public class TexasOutput {
     public static String toCallString(double amount){
         return String.format("To Call: $%.2f", amount);
     }
+    
+    public static String playerHand(TexasPlayer player){
+        return String.format("%s and %s", ((PlayingCard)player.getCard1()).toString(), ((PlayingCard)player.getCard2()).toString());
+    }
 }

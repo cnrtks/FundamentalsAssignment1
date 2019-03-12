@@ -36,7 +36,7 @@ public class TexasPlayer extends Player{
         return roundBet;
     }
     //end of getters and setters
-    
+
     public void walletUpdate(double amount){
         wallet += amount;
     }

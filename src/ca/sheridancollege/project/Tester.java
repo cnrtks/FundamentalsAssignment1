@@ -10,6 +10,13 @@ public class Tester {
      */
     public static void main(String[] args) {
         
+//        Deck d1 = new Deck();
+//        ArrayList<PlayingCard> deleteMe = new ArrayList();
+//        for (int i = 0; i < 5; i++){
+//            deleteMe.add((PlayingCard)d1.randCard());
+//        }
+//        HandValueChecker h1 = new HandValueChecker(deleteMe);
+        
         TexasHoldem th1 = new TexasHoldem("game1");
                 
         System.out.println("Enter Number of players: ");
