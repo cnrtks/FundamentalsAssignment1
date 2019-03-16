@@ -22,7 +22,7 @@ public class HandValueChecker {
     private int handValue = 0;
     private PlayingCard kicker;
     boolean flush;
-    int straightLow;
+    boolean straight;
 
     public HandValueChecker(ArrayList<PlayingCard> givenHand) {
         hand7 = new ArrayList();
@@ -32,17 +32,14 @@ public class HandValueChecker {
             System.out.println(a.toString());
         }
         handValue = matchCheck();
-        if (handValue > 1) {
-            straightLow = 0;
+       if (handValue > 1) {
+            straight = false;
             flush = false;
         } else {
-            straightLow = straightCheck();
+            straight = straightCheck();
             flush = flushCheck();
         }
-        handValue = handValue < 5 && straightLow != 0 ? 5 : handValue;
-        //handValue = handValue < 6 && flush ? 6 : handValue;
-        handValue = flush && straightLow != 0
-                ? (hand.get(0).getRank().getVal() == 10 ? 9 : 10) : handValue;
+        handValue = (flush && straight) ? (hand5.get(0).getRank().getVal() == 10 ? 9 : 10) : handValue;
 
     }
 
@@ -73,87 +70,120 @@ public class HandValueChecker {
         return false;
     }
 
-    public int straightCheck() {
-
-        ArrayList<PlayingCard> temp7 = new ArrayList();
+    public boolean straightCheck() {
+        ArrayList<PlayingCard> tempHand5 = new ArrayList();
+        Collections.reverse(hand7);
 
         for (PlayingCard c : hand7) {
-
             for (int i = 0; i < 5; i++) {
                 for (PlayingCard d : hand7) {
-                    if (c.getSuit().getVal() - i == d.getRank().getVal()) {
+                    if (c.getRank().getVal() - i == d.getRank().getVal()) {
                         try {
-                                if (temp7.get(i).getRank().getVal() != d.getRank().getVal()) {
-                                    temp7.remove(i);
+                            if (tempHand5.get(i).getSuit().getVal() != d.getSuit().getVal()) {
+                                tempHand5.remove(i);
+                                tempHand5.add(d);
+                            }
+                        } catch (Exception e) {
+                            tempHand5.add(d);
+                        }
+                    }
+                    if (c.getRank().getVal() == 5) {
+                        if (d.getRank().getVal() == 14) {
+                            try {
+                                if (tempHand5.get(4).getSuit().getVal() != d.getSuit().getVal()) {
+                                    tempHand5.remove(4);
+                                    tempHand5.add(d);
                                 }
                             } catch (Exception e) {
-                                temp7.add(d);
+                                tempHand5.add(d);
                             }
+                        }
+                    }
+                    if (tempHand5.size() == 5) {
+                        if (handValue < 5) {
+                            hand5.addAll(tempHand5);
+                        }
+                        return true;
                     }
                 }
             }
         }
+        return false;
     }
 
     //this should always return a value of 1,2,3,4,7, or 8 any other value is an error
     public int matchCheck() {
+        ArrayList<PlayingCard> tempHighestMatches = new ArrayList();
+        ArrayList<PlayingCard> highestMatches = new ArrayList();
+        ArrayList<PlayingCard> lowPair = new ArrayList();
+        ArrayList<PlayingCard> highestPair = new ArrayList();
+        ArrayList<PlayingCard> tempHand5 = new ArrayList();
+        ArrayList<PlayingCard> highestSingles = new ArrayList();
         int pair = 0;
         int highest = 0;
         int ret = 0;
         PlayingCard kickerTemp = hand7.get(0);
         for (PlayingCard c1 : hand7) {
+            tempHighestMatches.removeAll(tempHighestMatches);
             int matches = 0;
             for (PlayingCard c2 : hand7) {
                 if (c1.getRank().getVal() == c2.getRank().getVal()) {
                     matches++;
+                    tempHighestMatches.add(c1);
                 } else {
-                    kickerTemp = (c2.getRank().getVal() > kickerTemp.getRank().getVal())
-                            ? c2 : kickerTemp;
+                    if (c2.getRank().getVal() > kickerTemp.getRank().getVal()) {
+                        kickerTemp = c2;
+                    } else {
+                        highestSingles.add(0, c2);
+                    }
                 }
             }
-            pair = matches == 2 ? pair : pair++;
-            if (matches > highest) {
+            if (matches == 2) {
+                pair++;
+                if (!highestPair.isEmpty()) {
+                    lowPair.addAll(highestPair);
+                }
+                highestPair.removeAll(highestPair);
+                highestPair.addAll(tempHighestMatches);
+            }
+            if (matches >= highest) {
+                highestMatches.removeAll(highestMatches);
+                highestMatches.addAll(tempHighestMatches);
                 highest = matches;
             }
             highest = matches > highest ? highest : matches;
         }
-
         //2 pair
         if (pair > 1) {
             ret = 3;
+            tempHand5.addAll(highestPair);
+            tempHand5.addAll(lowPair);
+            tempHand5.add(kickerTemp);
         } //3 of a kind and fullhouse
         else if (highest == 3) {
-            ret = pair > 0 ? 7 : 4;
+            tempHand5.addAll(tempHighestMatches);
+            if (pair > 0) {
+                tempHand5.addAll(highestPair);
+                ret = 7;
+            } else {
+                ret = 4;
+            }
+            tempHand5.add(kickerTemp);
+
         } //highcard pair or four of a kind
         else {
             ret = highest > 3 ? 8 : highest;
+            tempHand5.addAll(tempHighestMatches);
+            tempHand5.add(kicker);
         }
 
+        int i = 0;
+        while (tempHand5.size() < 5) {
+            tempHand5.add(highestSingles.get(i));
+            i++;
+        }
         kicker = kickerTemp;
+        hand5.addAll(tempHand5);
         return ret;
     }
 }
-
-////checks variable length hands as HAND_SIZE (5) card hands
-////iterates 5 card hands from lowest to highest
-////takes lowest card and compares it with following 4 cards
-//// if they are consecutive == 5 returns lowest cards value
-////else returns 0
-////this function fails when presented with same value cards please fix
-//    public int straightCheck() { //dont use me
-//        int ret = 0;
-//        for (int i = 0; i <= (hand.size() - HAND_SIZE); i++) {
-//            int val = hand.get(i).getRank().getVal();
-//            int consecutive = 0;
-//            for (int j = 0; j < HAND_SIZE; j++) {
-//                if (hand.get(i + j + 1).getRank().getVal() == val + i + j + 1) {
-//                    consecutive++;
-//                }
-//                if (consecutive == HAND_SIZE) {
-//                    ret = val;
-//                }
-//            }
-//        }
-//        return ret;
-//    }
-//}
