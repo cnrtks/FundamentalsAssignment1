@@ -13,112 +13,122 @@ import java.util.Collections;
 //Four Of A Kind
 //Straight Flush
 //Royal Flush
-
-//can only handle hands of 5 cards
 public class HandValueChecker {
 
     public static int HAND_SIZE = 5;
 
-    private ArrayList<PlayingCard> hand;
+    private ArrayList<PlayingCard> hand7;
+    private ArrayList<PlayingCard> hand5;
     private int handValue = 0;
     private PlayingCard kicker;
     boolean flush;
     int straightLow;
 
     public HandValueChecker(ArrayList<PlayingCard> givenHand) {
-        hand = new ArrayList();
-        hand.addAll(givenHand);
-        Collections.sort(hand);
-        for (PlayingCard a : hand) {
+        hand7 = new ArrayList();
+        hand7.addAll(givenHand);
+        Collections.sort(hand7);
+        for (PlayingCard a : hand7) {
             System.out.println(a.toString());
         }
         handValue = matchCheck();
-        if (handValue > 1){
+        if (handValue > 1) {
             straightLow = 0;
             flush = false;
-        }
-        else{            
+        } else {
             straightLow = straightCheck();
             flush = flushCheck();
         }
         handValue = handValue < 5 && straightLow != 0 ? 5 : handValue;
-        handValue = handValue < 6 && flush ? 6 : handValue;
-        handValue = flush && straightLow !=0 ?
-                (hand.get(0).getRank().getVal() == 10 ? 9 : 10) : handValue;
-        
+        //handValue = handValue < 6 && flush ? 6 : handValue;
+        handValue = flush && straightLow != 0
+                ? (hand.get(0).getRank().getVal() == 10 ? 9 : 10) : handValue;
+
     }
 
-    public int getHandValue(){
+    public int getHandValue() {
         return handValue;
     }
-    
-    public PlayingCard getKicker(){
+
+    public PlayingCard getKicker() {
         return kicker;
     }
-    
+
     public boolean flushCheck() {
-        Suit s = hand.get(0).getSuit();
-        if (!hand.stream().noneMatch((c) -> (s != c.getSuit()))) { //functional operator READ UP ON THIS
-            return false;
+        int[] suits = new int[4];//clubs, diamonds, hearts, spades
+        for (PlayingCard c : hand7) {
+            suits[c.getSuit().getVal()]++;
+            if (suits[c.getSuit().getVal()] >= 5) {
+                if (handValue < 6) {
+                    handValue = 6;
+                    for (PlayingCard d : hand7) {
+                        if (d.getSuit().getVal() == suits[c.getSuit().getVal()]) {
+                            hand5.add(d);
+                        }
+                    }
+                }
+                return true;
+            }
         }
-        return true;
+        return false;
     }
 
     public int straightCheck() {
-        int val = hand.get(0).getRank().getVal();
-        int consecutive = 0;
-        //for aces low
-        if (hand.get(4).getRank().getVal() == 14) {
-            val = 1;
-            for (int i = 0; 1 < HAND_SIZE - 1; i++) {
-                consecutive = val + i + 1 == hand.get(i).getRank().getVal() ? consecutive++ : consecutive;
-            }
-        //for aces high
-        } else {
-            for (int i = 1; i < HAND_SIZE; i++) {
-                consecutive = val + i == hand.get(i).getRank().getVal() ? consecutive++ : consecutive;
+
+        ArrayList<PlayingCard> temp7 = new ArrayList();
+
+        for (PlayingCard c : hand7) {
+
+            for (int i = 0; i < 5; i++) {
+                for (PlayingCard d : hand7) {
+                    if (c.getSuit().getVal() - i == d.getRank().getVal()) {
+                        try {
+                                if (temp7.get(i).getRank().getVal() != d.getRank().getVal()) {
+                                    temp7.remove(i);
+                                }
+                            } catch (Exception e) {
+                                temp7.add(d);
+                            }
+                    }
+                }
             }
         }
-        return consecutive == HAND_SIZE - 1 ? val : 0;
     }
-    
+
     //this should always return a value of 1,2,3,4,7, or 8 any other value is an error
     public int matchCheck() {
         int pair = 0;
         int highest = 0;
         int ret = 0;
-        PlayingCard kickerTemp = hand.get(0);
-        for (PlayingCard c1 : hand) {
+        PlayingCard kickerTemp = hand7.get(0);
+        for (PlayingCard c1 : hand7) {
             int matches = 0;
-            for (PlayingCard c2 : hand) {
+            for (PlayingCard c2 : hand7) {
                 if (c1.getRank().getVal() == c2.getRank().getVal()) {
                     matches++;
-                }
-                else{
-                    kickerTemp = (c2.getRank().getVal() > kickerTemp.getRank().getVal()) ?
-                            c2 : kickerTemp;
+                } else {
+                    kickerTemp = (c2.getRank().getVal() > kickerTemp.getRank().getVal())
+                            ? c2 : kickerTemp;
                 }
             }
             pair = matches == 2 ? pair : pair++;
-            if (matches > highest){
+            if (matches > highest) {
                 highest = matches;
             }
             highest = matches > highest ? highest : matches;
         }
 
         //2 pair
-        if (pair == 2){
+        if (pair > 1) {
             ret = 3;
-        }
-        //3 of a kind and fullhouse
-        else if(highest == 3){
+        } //3 of a kind and fullhouse
+        else if (highest == 3) {
             ret = pair > 0 ? 7 : 4;
+        } //highcard pair or four of a kind
+        else {
+            ret = highest > 3 ? 8 : highest;
         }
-        //highcard pair or four of a kind
-        else{
-        ret = highest > 3 ? 8 : highest;    
-        }
-        
+
         kicker = kickerTemp;
         return ret;
     }
