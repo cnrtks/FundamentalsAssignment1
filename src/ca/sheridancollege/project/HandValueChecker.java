@@ -15,12 +15,11 @@ import java.util.Collections;
 //Royal Flush
 public class HandValueChecker {
 
-    public static int HAND_SIZE = 5;
+    public static final int HAND_SIZE = 5;
 
     private ArrayList<PlayingCard> hand7;
     private ArrayList<PlayingCard> hand5;
     private int handValue = 0;
-    private PlayingCard kicker;
     boolean flush;
     boolean straight;
 
@@ -30,55 +29,48 @@ public class HandValueChecker {
         hand7.addAll(givenHand);
         Collections.sort(hand7);
         Collections.reverse(hand7);
-        //for debug
-        for (PlayingCard a : hand7) {
-            System.out.println(a.toString());
-        }
-        //remove above
         handValue = matchCheck();
-        //for debug
-        System.out.println(toString());
-        //remove above
-
         //any matches higher than 3 of a kind will preclude the possibility of a straight or flush in 7 card hand
         if (handValue > 4) { //for given hand greater than 7 just remove this if
             straight = false;
             flush = false;
         } else {
             straight = straightCheck();
-            if (handValue < 6){
-            flush = flushCheck(hand7);
+            if (handValue < 6) {
+                flush = flushCheck(hand7);
             }
         }
+        //for debug
+        System.out.println(hand5);
+        //remove above
+        System.out.println(handValue);
+//        return handValue;
     }
 
     public int getHandValue() {
         return handValue;
     }
 
-    public PlayingCard getKicker() {
-        return kicker;
-    }
-
     public boolean straightCheck() {
         ArrayList<PlayingCard> tempHand5 = new ArrayList();
         ArrayList<PlayingCard> high5 = new ArrayList();
 
-        for (PlayingCard c : hand7) {
-            tempHand5.add(c);
-            for (int i = 1; i < HAND_SIZE; i++) {
+        for (int i = 0; i < hand7.size() - HAND_SIZE; i++) {
+            tempHand5.clear();
+            tempHand5.add(hand7.get(i));
+            for (int j = 1; j < HAND_SIZE; j++) {
                 for (PlayingCard d : hand7) {
-                    if (c.getRank().getVal() - i == d.getRank().getVal()) {
+                    if (hand7.get(i).getRank().getVal() - j == d.getRank().getVal()) {
                         try {
-                            if (tempHand5.get(i).getSuit().getVal() != d.getSuit().getVal()) {
-                                tempHand5.remove(i);
+                            if (tempHand5.get(j).getSuit().getVal() != d.getSuit().getVal()) {
+                                tempHand5.remove(j);
                                 tempHand5.add(d);
                             }
                         } catch (Exception e) {
                             tempHand5.add(d);
                         }
                     }
-                    if (c.getRank().getVal() == 5) {
+                    if (hand7.get(i).getRank().getVal() == 5) {
                         if (d.getRank().getVal() == 14) {
                             try {
                                 if (tempHand5.get(4).getSuit().getVal() != d.getSuit().getVal()) {
@@ -97,15 +89,14 @@ public class HandValueChecker {
                             handValue = tempHand5.get(0).getRank().getVal() == 10 ? 9 : 10;
                             hand5 = tempHand5;
                             return true;
-                        }
-                        else if (high5.isEmpty()){
+                        } else if (high5.isEmpty()) {
                             high5.addAll(tempHand5);
                         }
                     }
                 }
             }
         }
-        if(!high5.isEmpty() && handValue < 5){
+        if (!high5.isEmpty() && handValue < 5) {
             hand5.clear();
             hand5.addAll(high5);
             handValue = 5;
@@ -138,8 +129,8 @@ public class HandValueChecker {
         ArrayList<PlayingCard> tempHand7 = new ArrayList();
         ArrayList<PlayingCard> tempHighestMatches = new ArrayList();
         ArrayList<PlayingCard> highestMatches = new ArrayList();
-        ArrayList<PlayingCard> lowPair = new ArrayList();
         ArrayList<PlayingCard> highestPair = new ArrayList();
+        ArrayList<PlayingCard> lowPair = new ArrayList();
         ArrayList<PlayingCard> tempHand5 = new ArrayList();
 
         int pair = 0;
@@ -151,7 +142,7 @@ public class HandValueChecker {
 
         for (PlayingCard c1 : persistentHand7) {
             tempHighestMatches.clear();
-            int matches = 0;
+            int matches = 1;
             tempHighestMatches.add(c1);
             tempHand7.remove(c1);
             for (PlayingCard c2 : tempHand7) {
@@ -162,7 +153,7 @@ public class HandValueChecker {
             }
             if (matches == 2) {
                 pair++;
-                System.out.println(pair);//debug remove me
+                highest = matches > highest ? matches : highest;
                 if (pair == 1) {
                     highestPair.addAll(tempHighestMatches);
                 }
@@ -178,13 +169,12 @@ public class HandValueChecker {
         }
 
         //2 pair
-        if (pair > 1) {
+        if (pair > 1 && highest == 2) {
             ret = 3;
             tempHand5.addAll(highestPair);
             tempHand5.addAll(lowPair);
         } //3 of a kind and fullhouse
-        if (highest == 3) {
-            tempHand5.clear();
+        else if (highest == 3) {
             tempHand5.addAll(highestMatches);
             if (pair > 0) {
                 tempHand5.addAll(highestPair);
@@ -197,16 +187,11 @@ public class HandValueChecker {
             ret = highest > 3 ? 8 : highest;
             tempHand5.addAll(highestMatches);
         }
-        
+
         //used to fill hand to 5 and get highest kicker if needed
         int i = 0;
         persistentHand7.removeAll(tempHand5);
-        System.out.println(persistentHand7.size());//////////debug
-        System.out.println(tempHand5.size());///////////////debug
         while (tempHand5.size() < HAND_SIZE) {
-            if (kicker == null) {
-                kicker = persistentHand7.get(i);
-            }
             tempHand5.add(persistentHand7.get(i));
             i++;
         }
